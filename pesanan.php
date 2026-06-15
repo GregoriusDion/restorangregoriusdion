@@ -1,10 +1,7 @@
 <?php
-// File: pesanan.php  ← Halaman Pesanan
 require_once 'includes/koneksi.php';
 
 $pesan = '';
-
-// ── TAMBAH PESANAN ──
 if (isset($_POST['aksi']) && $_POST['aksi'] == 'tambah') {
     $id_menu       = (int) $_POST['id_menu'];
     $nama_pelanggan= mysqli_real_escape_string($koneksi, trim($_POST['nama_pelanggan']));
@@ -12,7 +9,6 @@ if (isset($_POST['aksi']) && $_POST['aksi'] == 'tambah') {
     $jumlah        = (int) $_POST['jumlah'];
     $catatan       = mysqli_real_escape_string($koneksi, trim($_POST['catatan']));
 
-    // Ambil harga menu
     $menu = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM daftar_menu WHERE id_menu=$id_menu AND status='tersedia'"));
     
     if (!$menu) {
@@ -24,14 +20,12 @@ if (isset($_POST['aksi']) && $_POST['aksi'] == 'tambah') {
         $sql = "INSERT INTO pesanan (id_menu, nama_pelanggan, nomor_meja, jumlah, subtotal, catatan, status) 
                 VALUES ($id_menu, '$nama_pelanggan', $meja, $jumlah, $subtotal, '$catatan', 'menunggu')";
         if (mysqli_query($koneksi, $sql)) {
-            // Kurangi stok
             mysqli_query($koneksi, "UPDATE daftar_menu SET stok = stok - $jumlah WHERE id_menu=$id_menu");
             $pesan = ['type' => 'success', 'teks' => "✅ Pesanan berhasil ditambahkan! Subtotal: Rp " . number_format($subtotal, 0, ',', '.')];
         }
     }
 }
 
-// ── UPDATE STATUS PESANAN ──
 if (isset($_GET['status']) && isset($_GET['id'])) {
     $id     = (int) $_GET['id'];
     $status = mysqli_real_escape_string($koneksi, $_GET['status']);
@@ -39,7 +33,6 @@ if (isset($_GET['status']) && isset($_GET['id'])) {
     if (in_array($status, $valid)) {
         mysqli_query($koneksi, "UPDATE pesanan SET status='$status' WHERE id_pesanan=$id");
         
-        // Kalau batal, kembalikan stok
         if ($status == 'batal') {
             $p = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM pesanan WHERE id_pesanan=$id"));
             mysqli_query($koneksi, "UPDATE daftar_menu SET stok = stok + {$p['jumlah']} WHERE id_menu={$p['id_menu']}");
@@ -48,10 +41,8 @@ if (isset($_GET['status']) && isset($_GET['id'])) {
     }
 }
 
-// ── HAPUS PESANAN ──
 if (isset($_GET['hapus'])) {
     $id = (int) $_GET['hapus'];
-    // Kembalikan stok dulu
     $p = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM pesanan WHERE id_pesanan=$id"));
     if ($p && $p['status'] != 'batal') {
         mysqli_query($koneksi, "UPDATE daftar_menu SET stok = stok + {$p['jumlah']} WHERE id_menu={$p['id_menu']}");
@@ -60,12 +51,10 @@ if (isset($_GET['hapus'])) {
     $pesan = ['type' => 'success', 'teks' => '✅ Pesanan dihapus!'];
 }
 
-// ── BUAT TRANSAKSI (dari pesanan selesai) ──
 if (isset($_GET['bayar'])) {
     $id = (int) $_GET['bayar'];
     $p  = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM pesanan WHERE id_pesanan=$id AND status='selesai'"));
     if ($p) {
-        // Cek belum ada transaksi
         $cek = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT id_transaksi FROM transaksi WHERE id_pesanan=$id"));
         if (!$cek) {
             $total = $p['subtotal'];
@@ -78,7 +67,6 @@ if (isset($_GET['bayar'])) {
     }
 }
 
-// ── AMBIL DATA ──
 $filter_status = isset($_GET['filter']) ? $_GET['filter'] : '';
 $sql_pesanan = "SELECT p.*, m.nama_menu, m.harga FROM pesanan p 
                 JOIN daftar_menu m ON p.id_menu = m.id_menu";
@@ -89,7 +77,6 @@ if ($filter_status) {
 $sql_pesanan .= " ORDER BY p.waktu_pesan DESC";
 $result_pesanan = mysqli_query($koneksi, $sql_pesanan);
 
-// Menu yang tersedia untuk dropdown
 $result_menu = mysqli_query($koneksi, "SELECT * FROM daftar_menu WHERE status='tersedia' ORDER BY kategori, nama_menu");
 
 require_once 'includes/header.php';
@@ -105,7 +92,6 @@ require_once 'includes/header.php';
         <div class="alert alert-<?= $pesan['type'] ?>"><?= $pesan['teks'] ?></div>
     <?php endif; ?>
 
-    <!-- Form Tambah Pesanan -->
     <div class="card">
         <h2>➕ Tambah Pesanan Baru</h2>
         <form method="POST">
@@ -145,11 +131,9 @@ require_once 'includes/header.php';
         </form>
     </div>
 
-    <!-- Tabel Pesanan -->
     <div class="card">
         <h2>📑 Daftar Pesanan</h2>
 
-        <!-- Filter Status -->
         <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
             <a href="pesanan.php" class="btn btn-sm <?= !$filter_status ? 'btn-primary' : 'btn-secondary' ?>">Semua</a>
             <?php foreach (['menunggu','diproses','selesai','batal'] as $s): ?>
