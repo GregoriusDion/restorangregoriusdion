@@ -1,10 +1,8 @@
 <?php
-// File: includes/koneksi.php
-// Pengaturan koneksi ke database XAMPP
 
 $host     = "localhost";
 $user     = "root";
-$password = "";          // Default XAMPP: kosong
+$password = "";
 $database = "db_restoran";
 
 $koneksi = mysqli_connect($host, $user, $password, $database);
