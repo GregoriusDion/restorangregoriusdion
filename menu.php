@@ -1,10 +1,8 @@
 <?php
-// File: menu.php  ← Halaman Daftar Menu
 require_once 'includes/koneksi.php';
 
 $pesan = '';
 
-// ── TAMBAH MENU ──
 if (isset($_POST['aksi']) && $_POST['aksi'] == 'tambah') {
     $nama     = mysqli_real_escape_string($koneksi, trim($_POST['nama_menu']));
     $kategori = mysqli_real_escape_string($koneksi, $_POST['kategori']);
@@ -26,7 +24,6 @@ if (isset($_POST['aksi']) && $_POST['aksi'] == 'tambah') {
     }
 }
 
-// ── EDIT MENU ──
 if (isset($_POST['aksi']) && $_POST['aksi'] == 'edit') {
     $id       = (int) $_POST['id_menu'];
     $nama     = mysqli_real_escape_string($koneksi, trim($_POST['nama_menu']));
@@ -43,10 +40,8 @@ if (isset($_POST['aksi']) && $_POST['aksi'] == 'edit') {
     }
 }
 
-// ── HAPUS MENU ──
 if (isset($_GET['hapus'])) {
     $id = (int) $_GET['hapus'];
-    // Cek apakah menu dipakai di pesanan
     $cek = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM pesanan WHERE id_menu=$id"));
     if ($cek['total'] > 0) {
         $pesan = ['type' => 'danger', 'teks' => '❌ Menu tidak bisa dihapus karena ada di data pesanan!'];
@@ -56,14 +51,12 @@ if (isset($_GET['hapus'])) {
     }
 }
 
-// ── DATA UNTUK EDIT ──
 $data_edit = null;
 if (isset($_GET['edit'])) {
     $id = (int) $_GET['edit'];
     $data_edit = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM daftar_menu WHERE id_menu=$id"));
 }
 
-// ── AMBIL SEMUA MENU ──
 $filter_kategori = isset($_GET['kategori']) ? $_GET['kategori'] : '';
 $sql_menu = "SELECT * FROM daftar_menu";
 if ($filter_kategori) {
@@ -86,7 +79,6 @@ require_once 'includes/header.php';
         <div class="alert alert-<?= $pesan['type'] ?>"><?= $pesan['teks'] ?></div>
     <?php endif; ?>
 
-    <!-- Form Tambah/Edit -->
     <div class="card">
         <h2><?= $data_edit ? '✏️ Edit Menu' : '➕ Tambah Menu Baru' ?></h2>
         <form method="POST">
@@ -148,11 +140,9 @@ require_once 'includes/header.php';
         </form>
     </div>
 
-    <!-- Tabel Menu -->
     <div class="card">
         <h2>📋 Daftar Menu (<?= mysqli_num_rows($result_menu) ?> item)</h2>
         
-        <!-- Filter -->
         <div style="margin-bottom:15px; display:flex; gap:10px; flex-wrap:wrap;">
             <a href="menu.php" class="btn btn-sm <?= !$filter_kategori ? 'btn-primary' : 'btn-secondary' ?>">Semua</a>
             <?php foreach (['Makanan','Minuman','Snack','Dessert','Lainnya'] as $k): ?>
