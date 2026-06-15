@@ -1,16 +1,13 @@
 <?php
-// File: index.php  ← Halaman Dashboard
 require_once 'includes/koneksi.php';
 require_once 'includes/header.php';
 
-// Ambil statistik dari database
 $total_menu     = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM daftar_menu"))['total'];
 $total_pesanan  = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM pesanan"))['total'];
 $pesanan_aktif  = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM pesanan WHERE status IN ('menunggu','diproses')"))['total'];
 $pendapatan     = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT SUM(total_bayar) as total FROM transaksi WHERE status_bayar = 'lunas'"))['total'];
 $pendapatan     = $pendapatan ?? 0;
 
-// 5 pesanan terbaru
 $pesanan_baru = mysqli_query($koneksi, "
     SELECT p.*, m.nama_menu 
     FROM pesanan p 
@@ -26,7 +23,6 @@ $pesanan_baru = mysqli_query($koneksi, "
         <p>Selamat datang! Berikut ringkasan aktivitas restoran hari ini.</p>
     </div>
 
-    <!-- Statistik -->
     <div class="stats">
         <div class="stat-box">
             <div class="icon">🍜</div>
@@ -50,7 +46,6 @@ $pesanan_baru = mysqli_query($koneksi, "
         </div>
     </div>
 
-    <!-- Pesanan Terbaru -->
     <div class="card">
         <h2>🕐 5 Pesanan Terbaru</h2>
         <?php if (mysqli_num_rows($pesanan_baru) > 0): ?>
