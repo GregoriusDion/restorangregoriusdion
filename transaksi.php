@@ -1,16 +1,13 @@
 <?php
-// File: transaksi.php  ← Halaman Transaksi
 require_once 'includes/koneksi.php';
 
 $pesan = '';
 
-// ── BAYAR / UPDATE STATUS BAYAR ──
 if (isset($_POST['aksi']) && $_POST['aksi'] == 'bayar') {
     $id_transaksi = (int) $_POST['id_transaksi'];
     $metode       = mysqli_real_escape_string($koneksi, $_POST['metode_bayar']);
     $dibayar      = (int) $_POST['jumlah_dibayar'];
 
-    // Ambil data transaksi
     $t = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT * FROM transaksi WHERE id_transaksi=$id_transaksi"));
     
     if ($dibayar >= $t['total_bayar']) {
@@ -26,15 +23,12 @@ if (isset($_POST['aksi']) && $_POST['aksi'] == 'bayar') {
         $pesan = ['type' => 'danger', 'teks' => "❌ Uang kurang Rp " . number_format($kurang, 0, ',', '.') . "!"];
     }
 }
-
-// ── HAPUS TRANSAKSI ──
 if (isset($_GET['hapus'])) {
     $id = (int) $_GET['hapus'];
     mysqli_query($koneksi, "DELETE FROM transaksi WHERE id_transaksi=$id");
     $pesan = ['type' => 'success', 'teks' => '✅ Transaksi dihapus!'];
 }
 
-// ── DATA UNTUK BAYAR ──
 $data_bayar = null;
 if (isset($_GET['bayar'])) {
     $id = (int) $_GET['bayar'];
@@ -47,7 +41,6 @@ if (isset($_GET['bayar'])) {
     "));
 }
 
-// ── STATISTIK KEUANGAN ──
 $stats = mysqli_fetch_assoc(mysqli_query($koneksi, "
     SELECT 
         COUNT(*) as total_transaksi,
@@ -57,7 +50,6 @@ $stats = mysqli_fetch_assoc(mysqli_query($koneksi, "
     FROM transaksi
 "));
 
-// ── AMBIL SEMUA TRANSAKSI ──
 $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 $sql_trans = "SELECT t.*, p.nama_pelanggan, p.nomor_meja, m.nama_menu 
               FROM transaksi t
@@ -83,7 +75,6 @@ require_once 'includes/header.php';
         <div class="alert alert-<?= $pesan['type'] ?>"><?= $pesan['teks'] ?></div>
     <?php endif; ?>
 
-    <!-- Statistik Keuangan -->
     <div class="stats">
         <div class="stat-box">
             <div class="icon">🧾</div>
@@ -107,7 +98,6 @@ require_once 'includes/header.php';
         </div>
     </div>
 
-    <!-- Form Pembayaran -->
     <?php if ($data_bayar): ?>
     <div class="card" style="border: 2px solid #e94560;">
         <h2>💳 Proses Pembayaran</h2>
@@ -145,7 +135,6 @@ require_once 'includes/header.php';
     </div>
     <?php endif; ?>
 
-    <!-- Tabel Transaksi -->
     <div class="card">
         <h2>🧾 Riwayat Transaksi</h2>
 
