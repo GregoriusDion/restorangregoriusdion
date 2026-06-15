@@ -1,5 +1,4 @@
 <?php
-// File: includes/header.php
 $halaman_aktif = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
